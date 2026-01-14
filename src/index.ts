@@ -2,6 +2,8 @@
  * App Entry - Dynamic Sizing & Feature Wiring
  */
 
+import './styles/main.css';
+
 import { CanvasManager, ExtendedToolType } from './canvas/CanvasManager';
 import { PatternAnalyzer } from './analysis/PatternAnalyzer';
 import { CodeGenerator } from './codegen/CodeGenerator';
@@ -31,6 +33,9 @@ class App {
                 this.resizeTimer = setTimeout(() => this.fitCanvasToScreen(), 100);
             }).observe(wrapper);
         }
+
+        // Safety check: force resize attempts if 0x0
+        this.ensureCanvasSize();
     }
     private resizeTimer: any;
 
@@ -55,7 +60,22 @@ class App {
             this.cursorPos.textContent = `Row ${r}, Col ${c}`;
         };
 
-        setTimeout(() => this.fitCanvasToScreen(), 0);
+        // Initial fit attempt
+        setTimeout(() => this.fitCanvasToScreen(), 50);
+    }
+
+    private ensureCanvasSize(): void {
+        let attempts = 0;
+        const check = setInterval(() => {
+            attempts++;
+            const wrapper = document.querySelector('.canvas-wrapper') as HTMLElement;
+            if (wrapper && wrapper.clientWidth > 0 && wrapper.clientHeight > 0) {
+                this.fitCanvasToScreen();
+                // If we have successful dims, stop checking
+                if (this.canvasManager.getGrid().rows > 0) clearInterval(check);
+            }
+            if (attempts > 20) clearInterval(check); // Stop after 10s (20 * 500ms)
+        }, 500);
     }
 
     private fitCanvasToScreen(): void {
@@ -64,10 +84,16 @@ class App {
 
         const width = wrapper.clientWidth;
         const height = wrapper.clientHeight;
+
+        // If hidden or collapsed, don't break state, just return
         if (width === 0 || height === 0) return;
 
         const cols = Math.floor(width / this.TARGET_CELL_SIZE);
         const rows = Math.floor(height / this.TARGET_CELL_SIZE);
+
+        // Prevent 0x0 if small container
+        if (cols <= 0 || rows <= 0) return;
+
         const pxWidth = cols * this.TARGET_CELL_SIZE;
         const pxHeight = rows * this.TARGET_CELL_SIZE;
 
