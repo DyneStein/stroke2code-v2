@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pattern Builder</title>
+  <link rel="stylesheet" href="/src/styles/main.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+</head>
+
+<body>
+  <div id="app">
+    <header class="header">
+      <div class="header-left">
+        <h1>🎨 Pattern Builder</h1>
+        <span class="tagline">Pro C++ Patterns</span>
+      </div>
+      <div class="header-right">
+        <span class="info-badge">Auto-Fit Grid</span>
+      </div>
+    </header>
+
+    <main class="main-container">
+      <!-- Left: Toolbar -->
+      <aside class="toolbar">
+
+        <!-- UNDO / REDO -->
+        <div class="tool-section">
+          <div class="tool-row">
+            <button id="undo-btn" class="action-btn small" title="Undo (Ctrl+Z)">
+              <span class="material-icons-round">undo</span>
+            </button>
+            <button id="redo-btn" class="action-btn small" title="Redo (Ctrl+Y)">
+              <span class="material-icons-round">redo</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- LAYERS -->
+        <div class="tool-section">
+          <h3>Layers</h3>
+          <div class="tool-grid">
+            <button class="tool-btn active" id="layer-fg" title="Animation Layer (Foreground)">
+              <span class="material-icons-round" style="color: #00ff88">animation</span>
+            </button>
+            <button class="tool-btn" id="layer-bg" title="Background Layer (Static)">
+              <span class="material-icons-round" style="color: #00bbff">image</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tools -->
+        <div class="tool-section">
+          <h3>Draw</h3>
+          <button class="tool-btn active" data-tool="draw" title="Pencil (D)">
+            <span class="material-icons-round">edit</span>
+          </button>
+          <button class="tool-btn" data-tool="erase" title="Eraser (E)">
+            <span class="material-icons-round">auto_fix_normal</span>
+          </button>
+        </div>
+
+        <!-- Shapes -->
+        <div class="tool-section">
+          <h3>Shapes</h3>
+          <div class="tool-grid">
+            <button class="tool-btn" data-tool="line" title="Line (L)">
+              <span class="material-icons-round">show_chart</span>
+            </button>
+            <button class="tool-btn" data-tool="rectangle" title="Rectangle (R)">
+              <span class="material-icons-round">crop_square</span>
+            </button>
+            <button class="tool-btn" data-tool="triangle" title="Triangle (T)">
+              <span class="material-icons-round">change_history</span>
+            </button>
+            <button class="tool-btn" data-tool="circle" title="Circle (C)">
+              <span class="material-icons-round">circle</span>
+            </button>
+            <button class="tool-btn" data-tool="diamond" title="Diamond (I)">
+              <span class="material-icons-round">diamond</span>
+            </button>
+          </div>
+
+          <button id="toggle-fill" class="toggle-btn active" title="Toggle Fill">
+            <span class="material-icons-round">format_color_fill</span>
+            <span>Fill Shape</span>
+          </button>
+        </div>
+
+        <!-- Symmetry -->
+        <div class="tool-section">
+          <h3>Symmetry</h3>
+          <div class="tool-row">
+            <button id="sym-x" class="toggle-btn small" title="Mirror Horizontal">
+              <span class="material-icons-round">swap_horiz</span>
+            </button>
+            <button id="sym-y" class="toggle-btn small" title="Mirror Vertical">
+              <span class="material-icons-round">swap_vert</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Transforms -->
+        <div class="tool-section">
+          <h3>Transform</h3>
+          <div class="tool-row">
+            <button id="flip-h" class="action-btn small" title="Flip Horizontally">
+              <span class="material-icons-round">flip</span>
+            </button>
+            <button id="flip-v" class="action-btn small" title="Flip Vertically">
+              <span class="material-icons-round" style="transform: rotate(90deg)">flip</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="tool-section">
+          <h3>Brush</h3>
+          <select id="brush-mode" class="tool-select">
+            <option value="solid">Solid</option>
+            <option value="shading">Shading</option>
+            <option value="noise">Noise</option>
+          </select>
+          <input type="text" id="brush-char" value="#" maxlength="1" class="char-input" title="Character">
+
+          <div id="palette-container" class="mt-2 hidden">
+            <label style="font-size: 10px; color: #888;">Shading Palette</label>
+            <input type="text" id="custom-palette" value=" .:+#@" class="char-input"
+              style="width: 100%; text-align: left; padding-left: 5px;" title="Custom Shading Characters">
+          </div>
+        </div>
+
+        <div class="tool-section">
+          <h3>Export</h3>
+          <div class="tool-row">
+            <button id="export-png" class="action-btn small" title="Download PNG">PNG</button>
+            <button id="export-json" class="action-btn small" title="Download JSON">JSON</button>
+          </div>
+        </div>
+
+        <div class="tool-section">
+          <h3>Gallery</h3>
+          <button id="save-btn" class="action-btn" style="width: 100%; margin-bottom: 4px;">Save</button>
+          <button id="load-btn" class="action-btn" style="width: 100%;">Load</button>
+        </div>
+
+        <div class="tool-section mt-auto">
+          <button id="clear-canvas" class="clear-btn">
+            <span class="material-icons-round">delete_sweep</span> Clear
+          </button>
+        </div>
+      </aside>
+
+      <!-- Center: Canvas & Animation -->
+      <section class="canvas-area">
+        <div class="canvas-wrapper">
+          <canvas id="drawing-canvas"></canvas>
+        </div>
+
+        <div class="timeline-controls">
+          <div class="frame-info">
+            <span id="frame-counter">Frame 1 / 1</span>
+          </div>
+
+          <div class="playback-controls">
+            <button id="prev-frame" class="anim-btn" title="Previous Frame"><span
+                class="material-icons-round">skip_previous</span></button>
+            <button id="play-anim" class="anim-btn" title="Play Animation"><span
+                class="material-icons-round">play_arrow</span></button>
+            <button id="next-frame" class="anim-btn" title="Next Frame"><span
+                class="material-icons-round">skip_next</span></button>
+          </div>
+
+          <div class="frame-actions">
+            <button id="add-frame" class="anim-btn" title="Add Frame"><span
+                class="material-icons-round">add_box</span></button>
+            <button id="copy-frame" class="anim-btn" title="Duplicate Frame"><span
+                class="material-icons-round">content_copy</span></button>
+            <button id="del-frame" class="anim-btn danger" title="Delete Frame"><span
+                class="material-icons-round">delete</span></button>
+          </div>
+        </div>
+
+        <div class="canvas-footer">
+          <span id="cursor-pos">Row 0, Col 0</span>
+          <span id="grid-dims">0x0</span>
+          <span id="cell-count">0 cells</span>
+        </div>
+      </section>
+
+      <aside class="output-area">
+        <div class="output-tabs">
+          <button class="tab-btn active" data-tab="code">C++ Code</button>
+          <button class="tab-btn" data-tab="preview">Preview</button>
+        </div>
+
+        <div class="tab-content" id="tab-code">
+          <div class="code-header">
+            <button id="copy-code" class="copy-btn">Copy Code</button>
+          </div>
+          <pre id="code-output"><code>// Draw to generate code</code></pre>
+        </div>
+
+        <div class="tab-content hidden" id="tab-preview">
+          <pre id="terminal-preview" class="terminal"></pre>
+        </div>
+      </aside>
+    </main>
+  </div>
+  <script type="module" src="/src/index.ts"></script>
+</body>
+
+</html>
