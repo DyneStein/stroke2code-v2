@@ -140,6 +140,13 @@ export class FrameManager {
         return this.frames;
     }
 
+    reset(): void {
+        this.frames = [];
+        this.addFrame();
+        this.currentFrameIndex = 0;
+        this.notify();
+    }
+
     private notify(): void {
         this.onFrameChange?.(this.currentFrameIndex, this.frames.length);
     }

@@ -345,6 +345,15 @@ export class CanvasManager {
     setChar(char: string): void { this.currentChar = char || '#'; }
     clear(): void { this.saveUndoState(); this.getGrid().clear(); this.render(); this.onGridChange?.(this.getGrid()); }
 
+    resetProject(): void {
+        this.saveUndoState();
+        this.backgroundGrid.clear();
+        this.frameManager.reset();
+        this.activeLayer = 'foreground';
+        this.render();
+        this.onGridChange?.(this.getGrid());
+    }
+
     resize(rows: number, cols: number, canvasWidth: number, canvasHeight: number): void {
         this.canvas.width = canvasWidth;
         this.canvas.height = canvasHeight;

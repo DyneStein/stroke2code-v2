@@ -249,6 +249,11 @@ class App {
         });
 
         // 12. Gallery Utils
+        document.getElementById('new-btn')!.addEventListener('click', () => {
+            if (confirm('Are you sure you want to start a new project? All unsaved changes will be lost.')) {
+                this.canvasManager.resetProject();
+            }
+        });
         document.getElementById('save-btn')!.addEventListener('click', () => {
             const name = prompt('Enter pattern name:');
             if (name) {
